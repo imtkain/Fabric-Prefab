@@ -369,9 +369,3 @@ Per [Microsoft documentation](https://learn.microsoft.com/en-us/fabric/data-ware
 - [Change Ownership of Fabric Warehouse](https://learn.microsoft.com/en-us/fabric/data-warehouse/change-ownership)
 - [Developer Tenant Settings](https://learn.microsoft.com/en-us/fabric/admin/service-admin-portal-developer)
 - [Enable SPN for Admin APIs](https://learn.microsoft.com/en-us/fabric/admin/enable-service-principal-admin-apis)
-
----
-
-## License
-
-MIT
