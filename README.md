@@ -6,7 +6,7 @@ Prefabricated Microsoft Fabric workspace provisioning via REST API. Batch-create
 
 ### Batch provisioning
 
-Standing up a new Fabric environment typically means clicking through the portal dozens of times—create a Lakehouse, create another Lakehouse, create a Notebook, create a Pipeline, repeat. With Fabric Prefab, you define all items in code and create them in one execution. Need 3 Lakehouses, 10 Notebooks, a Warehouse, and 5 Pipelines? Uncomment the lines and run the notebook. Done.
+Standing up a new Fabric environment typically means clicking through the portal dozens of times—create a Lakehouse, create another Lakehouse, create a Notebook, create a Pipeline, repeat. With Fabric Prefab, you define all items in code and create them in one execution. Need 3 Lakehouses, 10 Notebooks, a Warehouse, and 5 Pipelines? Easy. Drop the notebook into your favorite AI for context, tell it the names you want for your objects, and it uses the functions to give you a copy-paste ready script. Boom, done.
 
 ### SPN ownership prevents production outages
 
