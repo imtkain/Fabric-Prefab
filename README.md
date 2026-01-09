@@ -1,6 +1,16 @@
 # Fabric Prefab
 
 Prefabricated Microsoft Fabric workspace provisioning via REST API. Batch-create Lakehouses, Notebooks, Warehouses, Pipelines, and Dataflows in a single notebook run using Service Principal authentication.
+Additional notebook specifically for Fabric Warehouse SPN ownership takeover.
+
+## Notebooks
+
+| Notebook | Purpose |
+|----------|---------|
+| `000_spn_create_fabric_items.py` | Batch-create Fabric items (Lakehouses, Notebooks, Warehouses, Pipelines, Dataflows) with SPN ownership |
+| `000_spn_warehouse_ownership_transfer.py` | Inventory warehouses with owner info and transfer ownership from users to SPN |
+
+---
 
 ## Why use this?
 
@@ -54,7 +64,7 @@ A registered application in Microsoft Entra ID. See [Creating a Service Principa
 **Required.** Fabric tenant settings restrict SPN access to members of specified security groups—you cannot enable the tenant setting for "the entire organization" and expect individual SPNs to work. The SPN must be in a security group that is explicitly allowed. See [Creating a Security Group](#creating-a-security-group-and-adding-the-spn) below.
 
 ### 3. Tenant setting enabled
-A Fabric Administrator must enable **"Service principals can use Fabric APIs"** in Developer settings and add your security group. See [Configuring the Tenant Setting](#configuring-the-tenant-setting) below.
+A Fabric Administrator must enable **"Service principals can use Fabric APIs"** in Developer settings and add your security group. See [Configuring Tenant Settings](#configuring-tenant-settings) below.
 
 ### 4. Workspace access
 The SPN must have **Contributor** (minimum), **Member**, or **Admin** role on the target workspace:
@@ -73,7 +83,9 @@ Have the following ready (stored in Azure Key Vault recommended):
 
 ---
 
-## Notebook Usage
+## Create Fabric Items
+
+Batch-create Fabric items with SPN ownership.
 
 ### Supported Item Types
 
@@ -140,12 +152,72 @@ All items are created in the current workspace (auto-detected from runtime conte
 
 ---
 
+## Warehouse Ownership
+
+Inventory warehouses and transfer ownership from users to the Service Principal.
+
+### Why transfer ownership?
+
+User-owned warehouses break when:
+- Owner's account is deactivated (immediate failure)
+- Owner doesn't sign in for 30 days (token expiry—Fabric requirement)
+- Owner leaves the organization
+
+SPN ownership eliminates these risks.
+
+### Additional Tenant Setting Required
+
+This notebook uses the **Admin API** to retrieve owner information. This requires an additional tenant setting beyond the Developer settings:
+
+**Admin Portal → Tenant Settings → Admin API settings:**
+1. Locate **"Service principals can access read-only admin APIs"**
+2. Set to **Enabled**
+3. Select **Specific security groups**
+4. Add the same security group containing your SPN
+5. Click **Apply**
+
+Without this setting, the inventory call returns HTTP 403.
+
+### Step 1: Inventory warehouses
+
+```python
+df_inventory = get_warehouse_inventory_dataframe(access_token)
+display(df_inventory)
+```
+
+Returns a DataFrame with:
+- `workspace_name`
+- `workspace_id`
+- `warehouse_name`
+- `warehouse_id`
+- `owner_upn`
+- `owner_display_name`
+
+### Step 2: Transfer ownership to SPN
+
+```python
+# Take over ALL warehouses in the current workspace
+results = takeover_warehouses_batch(access_token)
+
+# Or take over specific warehouses by ID
+warehouse_ids_to_takeover = [
+    "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy",
+]
+results = takeover_warehouses_batch(access_token, warehouse_ids=warehouse_ids_to_takeover)
+```
+
+The takeover API transfers ownership to the **calling identity**. When authenticated as the SPN, the SPN becomes the new owner.
+
+---
+
 ## Troubleshooting
 
 | Error | Cause | Solution |
 |-------|-------|----------|
 | `401 Unauthorized` | Invalid or expired token | Verify credentials; regenerate client secret if expired |
 | `403 Forbidden` | SPN lacks workspace access | Add SPN as Contributor to workspace |
+| `403 Forbidden` on Admin API | Admin API tenant setting not enabled | Enable "Service principals can access read-only admin APIs" in Admin API settings |
 | `PrincipalTypeNotSupported` | Tenant setting not enabled for SPNs | Enable "Service principals can use Fabric APIs" and add SPN's security group |
 | `ItemDisplayNameAlreadyInUse` | Duplicate item name | Use a unique name |
 
@@ -216,9 +288,11 @@ Store all items securely in **Azure Key Vault**.
 
 ---
 
-## Configuring the Tenant Setting
+## Configuring Tenant Settings
 
-A **Fabric Administrator** must complete these steps in the [Fabric Admin Portal](https://app.fabric.microsoft.com/admin-portal/tenantSettings):
+A **Fabric Administrator** must complete these steps in the [Fabric Admin Portal](https://app.fabric.microsoft.com/admin-portal/tenantSettings).
+
+### Developer Settings (required for all notebooks)
 
 1. Navigate to **Admin Portal** → **Tenant Settings** → **Developer settings**
 2. Locate **"Service principals can use Fabric APIs"**
@@ -227,7 +301,16 @@ A **Fabric Administrator** must complete these steps in the [Fabric Admin Portal
 5. Add the security group containing your SPN (e.g., `sg-fabric-spn-access`)
 6. Click **Apply**
 
-> **Note:** As of mid-2025, Microsoft is splitting this into two settings:
+### Admin API Settings (required for 000_spn_warehouse_ownership_transfer)
+
+1. Navigate to **Admin Portal** → **Tenant Settings** → **Admin API settings**
+2. Locate **"Service principals can access read-only admin APIs"**
+3. Set to **Enabled**
+4. Select **Specific security groups**
+5. Add the same security group containing your SPN
+6. Click **Apply**
+
+> **Note:** As of mid-2025, Microsoft is splitting the Developer setting into two:
 > - *Service principal access to global APIs* — For creating workspaces, connections, deployment pipelines (disabled by default)
 > - *Service principal access to permission-based APIs* — For CRUD operations on existing workspace items (enabled by default)
 >
