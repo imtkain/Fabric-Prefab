@@ -6,7 +6,7 @@ Prefabricated Microsoft Fabric workspace provisioning via REST API. Batch-create
 
 ### Batch provisioning
 
-Standing up a new Fabric environment typically means clicking through the portal dozens of times—create a Lakehouse, create another Lakehouse, create a Notebook, create a Pipeline, repeat. With Fabric Prefab, you define all items in code and create them in one execution. Need 3 Lakehouses, 10 Notebooks, a Warehouse, and 5 Pipelines? Easy. Drop the notebook into your favorite AI for context, tell it the names you want for your objects, and it uses the functions to give you a copy-paste ready script. Boom, done.
+Standing up a new Fabric environment typically means clicking through the UI dozens of times... create a Lakehouse, create another Lakehouse, create a Notebook, create a Pipeline, repeat. With Fabric Prefab, you define all items in code and create them in one execution. Need 3 Lakehouses, 10 Notebooks, a Warehouse, and 5 Pipelines? Easy. Drop the notebook into your favorite AI for context, tell it the names you want for your objects, and it uses the functions to give you a copy-paste ready script. Boom, done.
 
 ### SPN ownership prevents production outages
 
@@ -172,16 +172,19 @@ You must hold **Application Administrator** or **Owner** rights in the Azure ten
 2. Name: `spn-global-fabric`
 3. Supported account types: **Single tenant**
 4. Click **Register**
+<img width="500" height="608" alt="image" src="https://github.com/user-attachments/assets/490138ea-738b-4d22-982b-edc8570e46e0" />
 
 #### 3. Verify the Service Principal
 - In the app blade, locate **Managed application in local directory**
 - If blank, click **Create service principal**
+<img width="351" height="147" alt="image" src="https://github.com/user-attachments/assets/74c688e8-cad8-4a13-a8fd-2221297f8f83" />
 
 #### 4. Create a Client Secret
 1. Navigate to **Certificates & secrets** → **+ New client secret**
 2. Description: `fabric-access-key`
 3. Expiration: 6–12 months
 4. Click **Add**
+<img width="1366" height="669" alt="image" src="https://github.com/user-attachments/assets/1757b5a4-2c07-4418-b657-b52f8b9e0ae0" />
 
 **⚠️ Copy these values immediately (displayed only once):**
 - Secret Value
