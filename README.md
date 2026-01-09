@@ -177,6 +177,7 @@ You must hold **Application Administrator** or **Owner** rights in the Azure ten
 #### 3. Verify the Service Principal
 - In the app blade, locate **Managed application in local directory**
 - If blank, click **Create service principal**
+<img width="343" height="145" alt="image" src="https://github.com/user-attachments/assets/1cc9182a-dfd0-4263-ac97-e72a2e205219" />
 <img width="351" height="147" alt="image" src="https://github.com/user-attachments/assets/74c688e8-cad8-4a13-a8fd-2221297f8f83" />
 
 #### 4. Create a Client Secret
